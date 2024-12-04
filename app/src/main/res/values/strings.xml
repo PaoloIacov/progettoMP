@@ -5,17 +5,30 @@
     <string name="scoreoption_ones">Ones</string>
     <string name="scoreoption_twos">Twos</string>
     <string name="scoreoption_threes">Threes</string>
-    <string name="scoreoption_full_house">Full House</string>
-    <string name="scoreoption_four_of_a_kind">Four of a Kind</string>
-    <string name="actual_score">Actual Score: %d</string>
-    <string name="roll_dice">Roll Dices</string>
-    <string name="confirm_selection">Confirm Selection</string>
     <string name="scoreoption_fours">Fours</string>
     <string name="scoreoption_fives">Fives</string>
     <string name="scoreoption_sixes">Sixes</string>
     <string name="scoreoption_three_of_a_kind">Three of a kind</string>
+    <string name="scoreoption_four_of_a_kind">Four of a Kind</string>
+    <string name="scoreoption_full_house">Full House</string>
     <string name="scoreoption_minor_straight">Minor straight</string>
     <string name="scoreoption_major_straight">Major straight</string>
     <string name="scoreoption_yahtzee">Yahtzee</string>
     <string name="scoreoption_chance">Chance</string>
+
+    //HomePage
+    <string name="singlePlayerTitle">Single player</string>
+    <string name="singlePlayerDescription">Challenge yourself</string>
+    <string name="multiPlayerTitle">MultiPlayer</string>
+    <string name="multiPlayerDescription">Play against other players \nonline</string>
+    <string name="historyTitle">History</string>
+    <string name="historyDescription">Check your previous games</string>
+
+    //SinglePlayerPage
+    <string name="actual_score">Actual Score: %d</string>
+    <string name="roll_dice">Roll Dices</string>
+    <string name="confirm_selection">Confirm Selection</string>
+    <string name="current_turn">Current turn: %1$s</string>
+    <string name="rolls_remaining">Rolls remaining: %1$s</string>
+
 </resources>

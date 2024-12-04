@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,7 +58,7 @@ fun HomePage(navController: NavController, viewModel: HomePageViewModel = viewMo
         ) {
             // Title: "D'Arby's Yahtzee"
             Text(
-                text = "D'Arby's \n Yahtzee",
+                text = stringResource(R.string.app_name),
                 fontFamily = titleFont(),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
@@ -69,8 +70,8 @@ fun HomePage(navController: NavController, viewModel: HomePageViewModel = viewMo
 
             // Card: "Gioca in solitario"
             GameOptionCard(
-                title = "Gioca in solitario",
-                description = "Sfida te stesso \nin una partita solitaria",
+                title = stringResource(R.string.singlePlayerTitle),
+                description = stringResource(R.string.singlePlayerDescription),
                 backgroundColor = RedCard,
                 imageResource = R.drawable.play_single_player,
                 onClick = { viewModel.onSinglePlayerClicked() }
@@ -79,8 +80,8 @@ fun HomePage(navController: NavController, viewModel: HomePageViewModel = viewMo
 
             // Card: "Gioca multigiocatore"
             GameOptionCard(
-                title = "Gioca multigiocatore",
-                description = "Sfida altri giocatori online",
+                title = stringResource(R.string.multiPlayerTitle),
+                description = stringResource(R.string.multiPlayerDescription),
                 backgroundColor = BlueCard,
                 imageResource = R.drawable.play_multiplayer,
                 onClick = { viewModel.onMultiplayerClicked() }
@@ -89,8 +90,8 @@ fun HomePage(navController: NavController, viewModel: HomePageViewModel = viewMo
 
             // Card: "Vedi storico delle tue partite"
             GameOptionCard(
-                title = "Vedi storico \ndelle tue partite",
-                description = "Controlla le tue partite passate",
+                title = stringResource(R.string.historyTitle),
+                description = stringResource(R.string.historyDescription),
                 backgroundColor = GreenCard,
                 imageResource = R.drawable.check_previous_games,
                 onClick = { viewModel.onHistoryClicked() }

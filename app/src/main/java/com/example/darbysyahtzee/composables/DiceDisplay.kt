@@ -1,24 +1,23 @@
 package com.example.darbysyahtzee.composables
 
-import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
 import com.example.darbysyahtzee.R
-import com.example.darbysyahtzee.viewModels.getDiceImageResource
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun DiceDisplay(
@@ -39,22 +38,32 @@ fun DiceDisplay(
                 4 -> R.drawable.dice_4
                 5 -> R.drawable.dice_5
                 6 -> R.drawable.dice_6
-                else -> R.drawable.dice_1
+                else -> null // Nessuna immagine quando il valore è 0
             }
 
-            // Display each dice with hold feature
-            Image(
-                painter = painterResource(id = diceImageResource),
-                contentDescription = "Dice $diceValue",
+            // Box grigio scuro dietro al dado per diminuire la saturazione del nero
+            Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(8.dp)) // Bordi arrotondati
+                    .background(Color(0x41333333)) // Grigio scuro, meno saturo
+                    .padding(4.dp)
                     .clickable {
                         if (!isRolling) {
-                            onToggleHold(index) // Toggle holding state of each dice
+                            onToggleHold(index)
                         }
                     }
-                    .border(2.dp, if (diceHeld[index]) Color.Green else Color.Transparent)
-            )
+            ) {
+                diceImageResource?.let {
+                    Image(
+                        painter = painterResource(id = diceImageResource),
+                        contentDescription = "Dice $diceValue",
+                        modifier = Modifier
+                            .size(64.dp)
+                            .border(2.dp, if (diceHeld[index]) Color.Green else Color.Transparent)
+                    )
+                }
+            }
         }
     }
 }

@@ -3,10 +3,10 @@ package com.example.darbysyahtzee.composables
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.example.darbysyahtzee.R
-import com.example.darbysyahtzee.viewModels.MultiPlayerPageViewModel
+import com.example.darbysyahtzee.viewModels.SinglePlayerPageViewModel
 
 @Composable
-fun ScoreStrings(viewModel: MultiPlayerPageViewModel) {
+fun ScoreStrings(viewModel: SinglePlayerPageViewModel) {
     val minorScoreStrings = listOf(
         stringResource(R.string.scoreoption_ones),
         stringResource(R.string.scoreoption_twos),

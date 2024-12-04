@@ -50,13 +50,7 @@ android {
 }
 
 dependencies {
-    // Force espresso-core version 3.5.1
-    configurations.all {
-        resolutionStrategy {
-            force("androidx.test.espresso:espresso-core:3.5.1")
-        }
-    }
-
+    // Core dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -68,8 +62,8 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.androidx.ui.test.android)
 
+    // Test dependencies
     testImplementation(libs.junit)
-
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
@@ -80,4 +74,8 @@ dependencies {
     // Debugging dependencies
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // New dependencies for DataStore and Gson
+    implementation("androidx.datastore:datastore-preferences:1.0.0") // DataStore for key-value storage
+    implementation("com.google.code.gson:gson:2.8.8") // Gson for JSON serialization
 }

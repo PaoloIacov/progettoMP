@@ -17,11 +17,20 @@
     <string name="scoreoption_yahtzee">Yahtzee</string>
     <string name="scoreoption_chance">Chance</string>
 
+    //HomePage
+    <string name="singlePlayerTitle">Gioca in solitario</string>
+    <string name="singlePlayerDescription">Sfida te stesso \nin una partita solitaria</string>
+    <string name="multiPlayerTitle">Gioca multigiocatore</string>
+    <string name="multiPlayerDescription">Sfida altri giocatori online</string>
+    <string name="historyTitle">Vedi storico \ndelle tue partite</string>
+    <string name="historyDescription">Controlla le tue partite passate</string>
+
     //SinglePlayerPage
     <string name="actual_score">Punteggio attuale: %d</string>
     <string name="roll_dice">Tira i dadi</string>
     <string name="confirm_selection">Conferma selezione</string>
-
+    <string name="current_turn">Turno attuale: %1$s</string>
+    <string name="rolls_remaining">Rolls remaining: %1$s</string>
 
 
 </resources>
