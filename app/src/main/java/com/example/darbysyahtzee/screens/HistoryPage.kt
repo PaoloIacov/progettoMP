@@ -1,34 +1,34 @@
 package com.example.darbysyahtzee.screens
 
-import androidx.compose.foundation.clickable
+import HistoryPageViewModel
+import HistoryPageViewModelFactory
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.darbysyahtzee.composables.GameCard
+import com.example.darbysyahtzee.R
+import com.example.darbysyahtzee.composables.HistoryCard
 
-// Sample data model for Game
-data class Game(
-    val gameId: String,
-    val date: String,
-    val finalScore: Int,
-    val scores: List<Int> // List of scores for each turn
-)
-
-// Mock list of games - replace this with actual data fetching
-val gameHistory = List(10) { index ->
-    Game(gameId = "game_$index", date = "2024-10-${15 - index}", finalScore = (100..300).random(), scores = List(13) { (10..50).random() })
-}
 
 @Composable
-fun HistoryPage(navController: NavController) {
+fun HistoryPage(navController: NavController, context: Context) {
+    val viewModel: HistoryPageViewModel = viewModel(factory = HistoryPageViewModelFactory(context))
+    val gameHistory by viewModel.gameHistory.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshHistory()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -37,21 +37,31 @@ fun HistoryPage(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Game History",
+            text = stringResource(R.string.game_history),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyColumn {
-            items(gameHistory.size) { index ->
-                val game = gameHistory[index]
-                GameCard(game = game) {
-                    navController.navigate("GameDetail/${game.gameId}")
+        if (gameHistory.isEmpty()) {
+            Text(
+                text = stringResource(R.string.no_games_played_yet),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(gameHistory.size) { index ->
+                    val game = gameHistory[index]
+                    HistoryCard(game = game) {
+                        navController.navigate("GameDetail/${game.gameId}")
+                    }
                 }
             }
         }
     }
 }
-

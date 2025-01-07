@@ -1,28 +1,35 @@
 package com.example.darbysyahtzee.viewModels
 
+import LocalDateTimeAdapter
 import android.content.Context
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.example.darbysyahtzee.composables.Game
 import com.example.darbysyahtzee.composables.ScoreOption
-import com.example.darbysyahtzee.database.Game
-import com.example.darbysyahtzee.database.gameDataStore
+import com.example.darbysyahtzee.composables.TurnScoreDetail
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class SinglePlayerPageViewModel(private val context: Context) : ViewModel() {
     private val maxTurns = 13
     private val maxRollsPerTurn = 3
-    private val gson = Gson()
+    private val bonusThreshold = 63
+    private val bonusScore = 35
+    private var isBonusAwarded = false
 
-    // Game state properties
+    private val gson = Gson()
+    private val sharedPreferences: SharedPreferences =
+        context.getSharedPreferences("game_history", Context.MODE_PRIVATE)
+
+    // State properties
     private val _diceValues = MutableStateFlow(List(5) { 0 })
     val diceValues: StateFlow<List<Int>> = _diceValues
 
@@ -53,29 +60,36 @@ class SinglePlayerPageViewModel(private val context: Context) : ViewModel() {
     private val _isGameOver = MutableStateFlow(false)
     val isGameOver: StateFlow<Boolean> = _isGameOver
 
-    // Track scores for each turn
-    private val turnScores = mutableListOf<Int>()
+    private val _bonusPoints = MutableStateFlow(bonusScore)
+    val bonusPoints: StateFlow<Int> = _bonusPoints
+
+    private val _bonusProgress = MutableStateFlow(0)
+    val bonusProgress: StateFlow<Int> = _bonusProgress
+
+    private val turnScores = mutableListOf<TurnScoreDetail>()
 
     init {
         resetTurn()
     }
 
-    // Initialize score categories
     fun initializeScoreStrings() {
         if (_minorScoreOptions.value.isEmpty() && _majorScoreOptions.value.isEmpty()) {
             val minorStrings = listOf("Ones", "Twos", "Threes", "Fours", "Fives", "Sixes")
-            val majorStrings = listOf("Three of a Kind", "Four of a Kind", "Full House", "Minor Straight", "Major Straight", "Yahtzee", "Chance")
+            val majorStrings = listOf(
+                "Three of a Kind", "Four of a Kind", "Full House",
+                "Minor Straight", "Major Straight", "Yahtzee", "Chance"
+            )
             setScoreOptionStrings(minorStrings, majorStrings)
         }
     }
 
-    // Sets score options based on category strings
     fun setScoreOptionStrings(minorStrings: List<String>, majorStrings: List<String>) {
-        _minorScoreOptions.value = minorStrings.map { ScoreOption(it, calculateScore(_diceValues.value, it)) }
-        _majorScoreOptions.value = majorStrings.map { ScoreOption(it, calculateScore(_diceValues.value, it)) }
+        _minorScoreOptions.value =
+            minorStrings.map { ScoreOption(it, calculateScore(_diceValues.value, it)) }
+        _majorScoreOptions.value =
+            majorStrings.map { ScoreOption(it, calculateScore(_diceValues.value, it)) }
     }
 
-    // Rolls dice, updates values, and recalculates score options
     fun rollDice() {
         if (_rollsRemaining.value > 0 && !_isGameOver.value) {
             val newValues = _diceValues.value.mapIndexed { index, value ->
@@ -84,12 +98,10 @@ class SinglePlayerPageViewModel(private val context: Context) : ViewModel() {
             _diceValues.value = newValues
             _rollsRemaining.update { it - 1 }
             _canRoll.value = _rollsRemaining.value > 0
-
             recalculateScoreOptions(newValues)
         }
     }
 
-    // Recalculates points for score options
     private fun recalculateScoreOptions(diceValues: List<Int>) {
         _minorScoreOptions.update { minorOptions ->
             minorOptions.map { it.copy(points = calculateScore(diceValues, it.name)) }
@@ -99,7 +111,6 @@ class SinglePlayerPageViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    // Toggles hold state of dice
     fun toggleHold(index: Int) {
         if (!_isGameOver.value) {
             _heldDice.update { holds ->
@@ -108,20 +119,41 @@ class SinglePlayerPageViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    // Selects a score option if rolls have been used
     fun selectScoreOption(option: ScoreOption) {
         if (_rollsRemaining.value < maxRollsPerTurn && !option.confirmed && !_isGameOver.value) {
             _selectedOption.value = option
         }
     }
 
-    // Confirms the selected score option, updates score, and checks for game end
     fun confirmSelection() {
         _selectedOption.value?.let { selectedOption ->
+            // Aggiorna il punteggio totale
             _totalScore.update { it + selectedOption.points }
-            turnScores.add(selectedOption.points)
+
+            // Salva i dettagli del turno
+            val turnDetail = TurnScoreDetail(
+                turn = _turnCount.value + 1,
+                scoreOption = selectedOption.name,
+                points = selectedOption.points
+            )
+            turnScores.add(turnDetail)
+
+            // Conferma l'opzione
             updateConfirmedOptions(selectedOption)
 
+            // Aggiorna il progresso bonus
+            val minorOption = _minorScoreOptions.value.find { it.name == selectedOption.name }
+            if (minorOption != null) {
+                _bonusProgress.update { it + selectedOption.points }
+            }
+
+            // Assegna il bonus solo una volta
+            if (!isBonusAwarded && _bonusProgress.value >= bonusThreshold) {
+                isBonusAwarded = true
+                _totalScore.update { it + bonusScore }
+            }
+
+            // Controlla fine gioco o resetta il turno
             if (_turnCount.value + 1 >= maxTurns) {
                 endGame()
             } else {
@@ -130,7 +162,6 @@ class SinglePlayerPageViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    // Resets turn state
     private fun resetTurn() {
         if (!_isGameOver.value) {
             _selectedOption.value = null
@@ -142,44 +173,63 @@ class SinglePlayerPageViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    // Ends the game, marks it complete, and saves the game data
     private fun endGame() {
         _isGameOver.value = true
         _canRoll.value = false
 
         val game = Game(
             gameId = UUID.randomUUID().toString(),
-            date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
+            date = LocalDateTime.now(),
             finalScore = _totalScore.value,
-            scores = turnScores.toList()
+            scores = turnScores.toList(),
+            bonusAchieved = isBonusAwarded
         )
-
+        Log.d("SinglePlayerPageViewModel", "Game ended: $game")
         saveGameToHistory(game)
     }
 
-    // Saves game history to DataStore
     private fun saveGameToHistory(game: Game) {
-        viewModelScope.launch {
-            context.gameDataStore.edit { preferences ->
-                val jsonHistory = preferences[HISTORY_KEY] ?: "[]"
-                val currentHistory = gson.fromJson(jsonHistory, Array<Game>::class.java).toMutableList()
-                currentHistory.add(0, game) // Add new game at the start
-                preferences[HISTORY_KEY] = gson.toJson(currentHistory.take(10)) // Save only the last 10 games
+        val gson = GsonBuilder()
+            .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
+            .create()
+        val sharedPreferences = context.getSharedPreferences("game_history", Context.MODE_PRIVATE)
+        val savedGamesJson = sharedPreferences.getStringSet("games", emptySet())
+
+        val currentGames = savedGamesJson?.mapNotNull { gameJson ->
+            try {
+                gson.fromJson(gameJson, Game::class.java)
+            } catch (e: Exception) {
+                Log.e("saveGameToHistory", "Failed to parse game: $gameJson", e)
+                null
+            }
+        }?.toMutableList() ?: mutableListOf()
+
+        currentGames.add(0, game)
+
+        val updatedGamesJson = currentGames.take(10).map { gson.toJson(it) }.toSet()
+        sharedPreferences.edit().putStringSet("games", updatedGamesJson).apply()
+
+        // Log dei dati salvati
+        Log.d("saveGameToHistory", "Game history saved successfully. Updated Games: $updatedGamesJson")
+    }
+
+
+
+    private fun updateConfirmedOptions(selectedOption: ScoreOption) {
+        _minorScoreOptions.update { list ->
+            list.map {
+                if (it == selectedOption) it.copy(confirmed = true)
+                else it
+            }
+        }
+        _majorScoreOptions.update { list ->
+            list.map {
+                if (it == selectedOption) it.copy(confirmed = true)
+                else it
             }
         }
     }
 
-    // Marks selected option as confirmed and updates score options
-    private fun updateConfirmedOptions(selectedOption: ScoreOption) {
-        _minorScoreOptions.update { list ->
-            list.map { if (it == selectedOption) it.copy(confirmed = true) else it }
-        }
-        _majorScoreOptions.update { list ->
-            list.map { if (it == selectedOption) it.copy(confirmed = true) else it }
-        }
-    }
-
-    // Calculates score based on dice values and scoring category
     private fun calculateScore(dice: List<Int>, category: String): Int {
         return when (category) {
             "Ones" -> dice.count { it == 1 }
@@ -203,6 +253,6 @@ class SinglePlayerPageViewModel(private val context: Context) : ViewModel() {
     }
 
     companion object {
-        private val HISTORY_KEY = stringPreferencesKey("game_history")
+        private const val HISTORY_KEY = "game_history"
     }
 }

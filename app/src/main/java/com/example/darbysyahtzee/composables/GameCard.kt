@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.darbysyahtzee.screens.Game
 
 @Composable
 fun GameCard(game: Game, onClick: () -> Unit) {
@@ -32,9 +31,4 @@ fun GameCard(game: Game, onClick: () -> Unit) {
     }
 }
 
-data class Game(
-    val gameId: String,
-    val date: String,
-    val finalScore: Int,
-    val scores: List<Int> // List of scores for each turn
-)
+

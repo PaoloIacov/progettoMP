@@ -30,7 +30,34 @@
     <string name="roll_dice">Tira i dadi</string>
     <string name="confirm_selection">Conferma selezione</string>
     <string name="current_turn">Turno attuale: %1$s</string>
-    <string name="rolls_remaining">Rolls remaining: %1$s</string>
+    <string name="rolls_remaining">Tiri rimanenti: %1$s</string>
 
+    //ProfilePage
+    <string name="profile">Profilo</string>
+    <string name="edit_nickname">Modifica Nickname</string>
+    <string name="statistics">Statistiche</string>
+    <string name="games_played">Partite giocate</string>
+    <string name="high_score">Punteggio massimo</string>
+    <string name="average_score">Punteggio medio</string>
+    <string name="yahtzee_count">Yahtzee fatti</string>
+    <string name="max_yahtzee_in_a_game">Record di Yahtzee in una partita</string>
+    <string name="multiplayer_stats">Statistiche multigiocatore</string>
+    <string name="wins">Vittorie</string>
+    <string name="losses">Sconfitte</string>
+    <string name="win_streak">Serie di vittorie</string>
+    <string name="back">Indietro</string>
+
+    //GameDetailsPage
+    <string name="game_details">Dettagli delle partite</string>
+    <string name="final_score">Punteggio finale: %1$s</string>
+    <string name="turn">Turno</string>
+    <string name="score_option">Opzione di punteggio</string>
+    <string name="points">Punti</string>
+
+    //HistoryPage
+    <string name="game_history">Storico delle partite</string>
+    <string name="no_games_played_yet">No games played yet!</string>
+    <string name="final_score_history">Punteggio finale: %1$s</string>
+    <string name="dateTime">Data: %1$s</string>
 
 </resources>

@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.darbysyahtzee.R
 import com.example.darbysyahtzee.composables.DiceRollerButton
+import com.example.darbysyahtzee.composables.ScoreOption
 import com.example.darbysyahtzee.composables.ScoreSelectionBox
 import com.example.darbysyahtzee.navigation.NavigationItem
 import com.example.darbysyahtzee.ui.theme.CreamBackground
@@ -28,6 +29,7 @@ fun SinglePlayerPage(navController: NavController) {
         factory = SinglePlayerPageViewModelFactory(context)
     )
 
+    // State values from the ViewModel
     val diceValues by viewModel.diceValues.collectAsState()
     val heldDice by viewModel.heldDice.collectAsState()
     val canRoll by viewModel.canRoll.collectAsState()
@@ -38,14 +40,17 @@ fun SinglePlayerPage(navController: NavController) {
     val totalScore by viewModel.totalScore.collectAsState()
     val turnCount by viewModel.turnCount.collectAsState()
     val isGameOver by viewModel.isGameOver.collectAsState()
+    val bonusPoints by viewModel.bonusPoints.collectAsState()
+    val bonusProgress by viewModel.bonusProgress.collectAsState()
 
+    // Trigger to initialize score strings
     LaunchedEffect(Unit) {
         viewModel.initializeScoreStrings()
     }
 
     if (isGameOver) {
         EndScreenPage(totalScore = totalScore) {
-            navController.navigate(NavigationItem.Play.route) // Navigate back to home screen
+            navController.navigate(NavigationItem.Play.route)
         }
     } else {
         Box(
@@ -60,6 +65,7 @@ fun SinglePlayerPage(navController: NavController) {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Turn and roll information
                 Text(
                     text = stringResource(id = R.string.current_turn, turnCount),
                     fontSize = 18.sp,
@@ -85,6 +91,7 @@ fun SinglePlayerPage(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Dice roller
                 DiceRollerButton(
                     onDiceRolled = { viewModel.rollDice() },
                     canRoll = canRoll,
@@ -96,24 +103,37 @@ fun SinglePlayerPage(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
+                // Score options and bonus
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 8.dp)
                     ) {
+                        // Minor Score Options
                         minorScoreOptions.forEach { option ->
                             ScoreSelectionBox(
                                 scoreOption = option,
                                 onSelect = { viewModel.selectScoreOption(it) }
                             )
                         }
+
+                        // Bonus Display
+                        ScoreSelectionBox(
+                            scoreOption = ScoreOption(
+                                name = "Bonus $bonusProgress/63",
+                                points = bonusPoints,
+                                confirmed = true
+                            ),
+                            onSelect = {} // Non-clickable
+                        )
                     }
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = 8.dp)
                     ) {
+                        // Major Score Options
                         majorScoreOptions.forEach { option ->
                             ScoreSelectionBox(
                                 scoreOption = option,
@@ -125,6 +145,7 @@ fun SinglePlayerPage(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Confirm Button
                 Button(
                     onClick = { viewModel.confirmSelection() },
                     enabled = selectedOption != null
